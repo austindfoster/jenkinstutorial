@@ -57,6 +57,7 @@ pipeline {
           script {
             dockerImage = docker.build registry + ":$BUILD_NUMBER"
           }
+          echo dockerImage
         }
       }
 
