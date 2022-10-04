@@ -1,7 +1,7 @@
 pipeline {
   environment {
     registry = "frostiflake/calculator-app"
-    registryCredential = 'JupitersAsh724'
+    registryCredential = 'dockerhub'
     dockerImage = ''
   }
 
