@@ -65,7 +65,7 @@ pipeline {
         steps{
           echo 'deploying image :)'
           script {
-            docker.withRegistry( 'https://hub.docker.com/repository/docker/frostiflake/calculator-app', registryCredential ) {
+            docker.withRegistry( 'https://hub.docker.com/repository/docker/frostiflake/calculator-app') {
               dockerImage.push()
             }
           }
