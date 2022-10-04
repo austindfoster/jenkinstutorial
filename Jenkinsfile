@@ -1,55 +1,87 @@
 pipeline {
-    agent any
-    tools {
-        maven 'apache maven 3.6.3'
-        jdk 'JDK 8'
-    }
-    environment {
+  environment {
+    registry = "frostiflake/calculator-app"
+    registryCredential = 'dockerhub'
+    dockerImage = ''
+  }
 
-        registry = "Your_Dockerhub_Username/Your_Dockerhub_Repository_Name"
+  agent any
 
-        registryCredential = 'dockerhub'
+  tools {
+     maven 'apache maven 3.6.3'
+     jdk 'JDK 8'
+  }
 
-        dockerImage=''
+  stages {
 
-    }
-    stages {
-        stage ('Clean') {
-            steps {
-                sh 'mvn clean'
-            }
+     stage ('Clean') {
+          steps {
+              sh 'mvn clean'
+          }
+      }
+
+      stage ('Build') {
+          steps {
+              sh 'mvn compile'
+          }
+      }
+
+      stage ('Short Tests') {
+          steps {
+              sh 'mvn -Dtest=CalculatorTest test'
+          }
+      }
+
+      stage ('Long Tests') {
+          steps {
+              sh 'mvn -Dtest=CalculatorTestThorough test'
+          }
+          post {
+              success {
+                  junit 'target/surefire-reports/**/*.xml'
+              }
+          }
+      }
+
+      stage ('Package') {
+          steps {
+              sh 'mvn package'
+              archiveArtifacts artifacts: 'src/**/*.java'
+              archiveArtifacts artifacts: 'target/*.jar'
+          }
+      }
+
+      stage('Building image') {
+        steps{
+          script {
+            dockerImage = docker.build registry + ":$BUILD_NUMBER"
+          }
         }
+      }
 
-        stage ('Build') {
-            steps {
-                sh 'mvn compile'
+      stage('Deploy Image') {
+        steps{
+          script {
+            docker.withRegistry( '', registryCredential ) {
+              dockerImage.push()
             }
+          }
         }
-
-        stage ('Short Tests') {
-            steps {
-                sh 'mvn -Dtest=CalculatorTest test'
-            }
+      }
+      
+      stage('Remove Unused docker image') {
+          steps{
+            sh "docker rmi $registry:$BUILD_NUMBER"
+          }
         }
+      }
 
-        stage ('Long Tests') {
-            steps {
-                sh 'mvn -Dtest=CalculatorTestThorough test'
-            }
-            post {
-                success {
-                    junit 'target/surefire-reports/**/*.xml'
-                }
-            }
-        }
-
-        stage ('Package') {
-            steps {
-                sh 'mvn package'
-                archiveArtifacts artifacts: 'src/**/*.java'
-                archiveArtifacts artifacts: 'target/*.jar'
-            }
-        }
-
-    }
+      post {
+          failure {
+              mail to: 'austin.foster914@gmail.com',
+              subject: "Failed Pipeline: ${currentBuild.fullDisplayName}",
+              body: "Something is wrong with ${env.BUILD_URL}"
+          }
+      }
 }
+
