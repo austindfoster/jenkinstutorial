@@ -4,6 +4,15 @@ pipeline {
         maven 'apache maven 3.6.3'
         jdk 'JDK 8'
     }
+    environment {
+
+        registry = "Your_Dockerhub_Username/Your_Dockerhub_Repository_Name"
+
+        registryCredential = 'dockerhub'
+
+        dockerImage=''
+
+    }
     stages {
         stage ('Clean') {
             steps {
