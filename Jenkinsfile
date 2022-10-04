@@ -1,7 +1,7 @@
 pipeline {
   environment {
     registry = "frostiflake/calculator-app"
-    registryCredential = 'dockerhub'
+    registryCredential = 'JupitersAsh724'
     dockerImage = ''
   }
 
@@ -65,7 +65,7 @@ pipeline {
         steps{
           echo 'deploying image :)'
           script {
-            docker.withRegistry( '', registryCredential ) {
+            docker.withRegistry( 'https://hub.docker.com/repository/docker/frostiflake/calculator-app', registryCredential ) {
               dockerImage.push()
             }
           }
