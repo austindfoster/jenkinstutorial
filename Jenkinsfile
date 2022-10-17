@@ -53,19 +53,16 @@ pipeline {
 
       stage('Building image') {
         steps{
-          echo 'buiding image :)'
           script {
             dockerImage = docker.build registry + ":$BUILD_NUMBER"
           }
-          echo 'image built'
         }
       }
 
       stage('Deploy Image') {
         steps{
-          echo 'deploying image :)'
           script {
-            docker.withRegistry( 'https://hub.docker.com/repository/docker/frostiflake/calculator-app') {
+            docker.withRegistry( '', registryCredential ) {
               dockerImage.push()
             }
           }
@@ -78,13 +75,13 @@ pipeline {
           }
         }
       }
-}
 
-post {
-  failure {
-    mail to: 'austin.foster914@gmail.com',
-      subject: "Failed Pipeline: ${currentBuild.fullDisplayName}",
-      body: "Something is wrong with ${env.BUILD_URL}"
-  }
+      post {
+          failure {
+              mail to: 'austin.foster914@gmail.com',
+              subject: "Failed Pipeline: ${currentBuild.fullDisplayName}",
+              body: "Something is wrong with ${env.BUILD_URL}"
+          }
+      }
 }
 
