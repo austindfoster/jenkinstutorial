@@ -74,13 +74,13 @@ pipeline {
             sh "docker rmi $registry:$BUILD_NUMBER"
           }
       }
-   }
-   post {
+     post {
           failure {
               mail to: 'austin.foster914@gmail.com',
               subject: "Failed Pipeline: ${currentBuild.fullDisplayName}",
               body: "Something is wrong with ${env.BUILD_URL}"
           }
+   }
    }
 }
 
